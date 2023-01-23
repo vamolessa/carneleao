@@ -53,11 +53,16 @@ async function onGenerateButtonClicked() {
 
         let url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao=%27${month}-${day}-${year}%27&$format=json&$select=cotacaoCompra`;
         let response = await fetch(url);
-        let json = await response.json();
+        let responseText = await response.text();
+        let responseJson = JSON.parse(responseText);
 
-        let rates = json.value[0];
+        let rates = responseJson.value[0];
         if (rates != null) {
             conversionRate = rates.cotacaoCompra;
+        } else {
+            console.error("could not fetch conversion rate. response:");
+            console.error(responseText);
+            console.error(url);
         }
     }
 
