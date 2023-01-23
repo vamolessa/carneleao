@@ -5,6 +5,7 @@ const state = {
     amountInUsdElement: null,
     conversionDateElement: null,
     conversionRateElement: null,
+    conversionRateApiLinkElement: null,
     amountInReaisElement: null,
     generatedTextElement: null,
 };
@@ -14,6 +15,7 @@ window.onload = function() {
     state.amountInUsdElement = document.getElementById("amountInUsd");
     state.conversionDateElement = document.getElementById("conversionDate");
     state.conversionRateElement = document.getElementById("conversionRate");
+    state.conversionRateApiLinkElement = document.getElementById("apiLink");
     state.amountInReaisElement = document.getElementById("amountInReais");
     state.generatedTextElement = document.getElementById("generated");
 
@@ -36,34 +38,45 @@ async function onGenerateButtonClicked() {
     let date = state.receiveDateElement.valueAsDate;
     date.setDate(15);
     date.setMonth(date.getMonth() - 1);
-    while (true) {
-        let weekDay = date.getDay();
-        let isWeekend = weekDay == 0 || weekDay == 6;
-        if (!isWeekend) {
-            break;
-        }
-        date.setDate(date.getDate() - 1);
-    }
 
     let conversionRate = 0.0;
-    {
-        let day = date.getDate().toLocaleString("pt-BR", { minimumIntegerDigits: 2 });
-        let month = (date.getMonth() + 1).toLocaleString("pt-BR", { minimumIntegerDigits: 2 });
-        let year = date.getFullYear();
 
-        let url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao=%27${month}-${day}-${year}%27&$format=json&$select=cotacaoCompra`;
-        let response = await fetch(url);
-        let responseText = await response.text();
-        let responseJson = JSON.parse(responseText);
-
-        let rates = responseJson.value[0];
-        if (rates != null) {
-            conversionRate = rates.cotacaoCompra;
-        } else {
-            console.error("could not fetch conversion rate. response:");
-            console.log(responseText);
-            console.log(url);
+    const maxTryCount = 10;
+    let tryCount = 0;
+    while (tryCount < maxTryCount) {
+        while (true) {
+            let weekDay = date.getDay();
+            let isWeekend = weekDay == 0 || weekDay == 6;
+            if (!isWeekend) {
+                break;
+            }
+            date.setDate(date.getDate() - 1);
         }
+
+        {
+            let day = date.getDate().toLocaleString("pt-BR", { minimumIntegerDigits: 2 });
+            let month = (date.getMonth() + 1).toLocaleString("pt-BR", { minimumIntegerDigits: 2 });
+            let year = date.getFullYear();
+
+            let url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao=%27${month}-${day}-${year}%27&$format=json&$select=cotacaoCompra`;
+            let response = await fetch(url);
+            let responseText = await response.text();
+            let responseJson = JSON.parse(responseText);
+
+            let rates = responseJson.value[0];
+            if (rates != null) {
+                state.conversionRateApiLinkElement.setAttribute("href", url);
+                conversionRate = rates.cotacaoCompra;
+                break;
+            }
+
+            date.setDate(date.getDate() - 1);
+        }
+
+        tryCount += 1;
+    }
+    if (tryCount >= maxTryCount) {
+        console.error("could not fetch conversion rate");
     }
 
     let amountInUsd = state.amountInUsdElement.value.replace(".", "").replace(",", ".");
