@@ -18,7 +18,7 @@ window.onload = function() {
     state.generatedTextElement = document.getElementById("generated");
 
     let pastMonth = new Date();
-    pastMonth.setDate(1);
+    pastMonth.setDate(15);
     pastMonth.setMonth(pastMonth.getMonth() - 1);
 
     state.receiveDateElement.valueAsDate = pastMonth;
@@ -61,8 +61,8 @@ async function onGenerateButtonClicked() {
             conversionRate = rates.cotacaoCompra;
         } else {
             console.error("could not fetch conversion rate. response:");
-            console.error(responseText);
-            console.error(url);
+            console.log(responseText);
+            console.log(url);
         }
     }
 
