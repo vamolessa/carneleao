@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>carnê leão</title>
+    <link rel="stylesheet" type="text/css" href="index.css" media="screen" />
+    <script src="index.js"></script>
+</head>
+
+<body>
+    <h1>carnê leão</h1>
+
+    <label for="receiveDate">data de recebimento</label>
+    <input id="receiveDate" type="date" name="receiveDate" />
+
+    <label for="amountInUsd">valor em usd</label>
+    <input id="amountInUsd" type="text" name="amountInUsd" placeholder="0.000,00" />
+
+    <button id="generate">generate!</button>
+
+    <h3>declaração</h3>
+
+    <label for="conversionRate">taxa de conversão (compra)</label>
+    <input id="conversionRate" type="text" name="conversionRate" disabled />
+
+    <label for="amountInReais">valor em reais</label>
+    <input id="amountInReais" type="text" name="amountInReais" disabled />
+
+    <textarea id="generated" rows="4" disabled></textarea>
+
+</body>
+
+</html>
