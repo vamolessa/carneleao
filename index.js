@@ -3,6 +3,7 @@
 const state = {
     receiveDateElement: null,
     amountInUsdElement: null,
+    conversionDateElement: null,
     conversionRateElement: null,
     amountInReaisElement: null,
     generatedTextElement: null,
@@ -11,11 +12,16 @@ const state = {
 window.onload = function() {
     state.receiveDateElement = document.getElementById("receiveDate");
     state.amountInUsdElement = document.getElementById("amountInUsd");
+    state.conversionDateElement = document.getElementById("conversionDate");
     state.conversionRateElement = document.getElementById("conversionRate");
     state.amountInReaisElement = document.getElementById("amountInReais");
     state.generatedTextElement = document.getElementById("generated");
 
-    state.receiveDateElement.valueAsDate = new Date();
+    let pastMonth = new Date();
+    pastMonth.setDate(1);
+    pastMonth.setMonth(pastMonth.getMonth() - 1);
+
+    state.receiveDateElement.valueAsDate = pastMonth;
     onGenerateButtonClicked();
 
     document.getElementById("generate").onclick = onGenerateButtonClicked;
@@ -28,6 +34,16 @@ function formatFinancialNumber(n, maxFracDigits) {
 
 async function onGenerateButtonClicked() {
     let date = state.receiveDateElement.valueAsDate;
+    date.setDate(15);
+    date.setMonth(date.getMonth() - 1);
+    while (true) {
+        let weekDay = date.getDay();
+        let isWeekend = weekDay == 0 || weekDay == 6;
+        if (!isWeekend) {
+            break;
+        }
+        date.setDate(date.getDate() - 1);
+    }
 
     let conversionRate = 0.0;
     {
@@ -51,6 +67,8 @@ async function onGenerateButtonClicked() {
         amountInUsd = 0.0;
     }
 
+    state.conversionDateElement.valueAsDate = date;
+
     let conversionRateFormatted = formatFinancialNumber(conversionRate, 4);
     state.conversionRateElement.value = conversionRateFormatted;
 
@@ -60,7 +78,8 @@ async function onGenerateButtonClicked() {
     let amountInUsdFormatted = formatFinancialNumber(amountInUsd, 2);
 
     let dateLocale = date.toLocaleDateString("pt-BR");
-    state.generatedTextElement.textContent =
-        "Recebimento de salário referente a trabalho para empresa estrangeira BIT CAKE STUDIO OU, localizada na Estonia. " +
-        `Valor em USD: \$${amountInUsd}. Câmbio utilizado: ${dateLocale}, segundo a taxa de compra do Banco Central: ${conversionRate}`;
+    let generatedText =
+        "Recebimento de salário referente a trabalho para empresa estrangeira BIT CAKE STUDIO OU, localizada na Estônia. " +
+        `Valor em USD: \$${amountInUsdFormatted}. Câmbio utilizado: ${conversionRate}, segundo a taxa de compra do Banco Central em ${dateLocale}`;
+    state.generatedTextElement.value = generatedText;
 }
