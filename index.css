@@ -20,7 +20,11 @@ body {
     justify-content: center;
 }
 
-p {
-    background-color: lightgray;
-    padding: 8px;
+#version {
+    position: fixed;
+    width: 600px;
+    text-align: right;
+    bottom: 16px;
+    color: gray;
+    font-size: 12px;
 }
